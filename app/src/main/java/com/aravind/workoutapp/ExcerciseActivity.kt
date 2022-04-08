@@ -1,13 +1,22 @@
 package com.aravind.workoutapp
 
+import android.app.Dialog
+import android.content.Intent
+import android.media.MediaPlayer
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.speech.tts.TextToSpeech
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.aravind.workoutapp.databinding.ActivityExcerciseBinding
+import com.aravind.workoutapp.databinding.DialogCustomBackBinding
+import java.util.*
 
-class ExcerciseActivity : AppCompatActivity() {
+class ExcerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private var binding : ActivityExcerciseBinding? = null
 
@@ -28,23 +37,42 @@ class ExcerciseActivity : AppCompatActivity() {
     var exerciseList = arrayListOf<ExerciseModel>()
     var currentPosition = -1
 
+    //TextToSpeech
+    var textToSpeech : TextToSpeech? = null
+
+    //Start Sound
+    var player : MediaPlayer? = null
+
+    //Recyclerview Adapter
+    private var adapter : ExerciseAdapter? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityExcerciseBinding.inflate(layoutInflater)
         setContentView(binding?.root)
 
         exerciseList = Constants.defaultExerciseList()
-
         setSupportActionBar(binding?.toolbarExercise)
         if (supportActionBar != null){
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
         }
         binding?.toolbarExercise?.setNavigationOnClickListener{
-            onBackPressed()
+//            onBackPressed()
+            customBackDialog()
         }
         setupResetView()
+
+        textToSpeech = TextToSpeech(this,this)
+
+        setRecyclerviewExercise()
     }
 
+    private fun setRecyclerviewExercise(){
+        adapter = ExerciseAdapter(exerciseList)
+        binding?.exerciseRecyclerview?.layoutManager =
+            LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
+        binding?.exerciseRecyclerview?.adapter = adapter
+    }
     private fun setupResetView(){
 
         binding?.flExerciseFrameLayout?.visibility = View.INVISIBLE
@@ -61,6 +89,15 @@ class ExcerciseActivity : AppCompatActivity() {
         }
         binding?.tvUpcomingExerciseName?.text = exerciseList[currentPosition + 1].name
 
+        try {
+            val soundUri = Uri.parse("android.resource:" +
+                    "//com.aravind.workoutapp/" + R.raw.press_start)
+            player = MediaPlayer.create(applicationContext, soundUri)
+            player?.isLooping = false
+            player?.start()
+        }catch (e : Exception){
+            e.printStackTrace()
+        }
         setProgressBar()
     }
 
@@ -74,8 +111,11 @@ class ExcerciseActivity : AppCompatActivity() {
                 binding?.tvTimer?.text = (10 - restProgress).toString()
 
             }
-
             override fun onFinish() {
+
+                exerciseList[currentPosition]?.isSelected = true
+                adapter?.notifyDataSetChanged()
+
                setupExerciseView()
             }
 
@@ -96,14 +136,15 @@ class ExcerciseActivity : AppCompatActivity() {
             exerciseRestProgress = 0
         }
 
+        binding?.tvExerciseName?.text = exerciseList[currentPosition]?.name
+        binding?.imageView?.setImageResource(exerciseList[currentPosition].image)
+        speakOut(exerciseList[currentPosition].name)
         setExerciseProgressBar()
     }
 
     private fun setExerciseProgressBar(){
         binding?.exerciseProgressBar?.progress = exerciseRestProgress
 
-        binding?.tvExerciseName?.text = exerciseList[currentPosition]?.name
-        binding?.imageView?.setImageResource(exerciseList[currentPosition].image)
 
         exerciseRestTimer = object : CountDownTimer(30000,1000){
             override fun onTick(milliSecond: Long) {
@@ -113,10 +154,18 @@ class ExcerciseActivity : AppCompatActivity() {
             }
 
             override fun onFinish() {
+
                 if (currentPosition < exerciseList?.size -1 ){
                     setupResetView()
+                    exerciseList[currentPosition]?.isSelected = false
+                    exerciseList[currentPosition]?.isCompleted = true
+                    adapter?.notifyDataSetChanged()
+
                 }else{
-                    Toast.makeText(this@ExcerciseActivity,"Congrats!!! \nCompleted all exercise",Toast.LENGTH_LONG).show()
+                    speakOut("Congrats You Completed all exercise")
+                    finish()
+                    val intent = Intent(this@ExcerciseActivity,FinishActivity::class.java)
+                    startActivity(intent)
                 }
             }
 
@@ -150,11 +199,56 @@ class ExcerciseActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun customBackDialog(){
+        val dialog = Dialog(this)
+        val dialogBinding = DialogCustomBackBinding.inflate(layoutInflater)
+        dialog.setContentView(dialogBinding.root)
+
+        dialogBinding.tvYes.setOnClickListener {
+            this.finish()
+            dialog.dismiss()
+        }
+        dialogBinding.tvNo.setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS){
+            val result = textToSpeech?.setLanguage(Locale.US)
+
+            if (result == TextToSpeech.LANG_MISSING_DATA ||
+                    result == TextToSpeech.LANG_NOT_SUPPORTED){
+                Log.e("NOO","LANG NOT SUPPORT")
+            }
+        }else{
+            Log.e("NOO","LANG INIT ERROR")
+        }
+    }
+
+    private fun speakOut(text : String){
+        textToSpeech?.speak(text,TextToSpeech.QUEUE_FLUSH,null,"")
+    }
+
+    override fun onBackPressed() {
+        //super.onBackPressed()
+        customBackDialog()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         if (restTimer != null){
             restTimer?.cancel()
             restProgress = 0
+        }
+        if (textToSpeech != null){
+            textToSpeech?.stop()
+            textToSpeech?.shutdown()
+        }
+        if (player != null){
+            player?.stop()
         }
         binding = null
     }

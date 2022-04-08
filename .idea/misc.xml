@@ -7,11 +7,17 @@
         <entry key="..\:/Android/WorkoutApp/app/src/main/res/drawable/circular_progress_gray.xml" value="0.118" />
         <entry key="..\:/Android/WorkoutApp/app/src/main/res/drawable/item_circular_color_accent_background.xml" value="0.12" />
         <entry key="..\:/Android/WorkoutApp/app/src/main/res/drawable/item_circular_color_accent_border.xml" value="0.118" />
+        <entry key="..\:/Android/WorkoutApp/app/src/main/res/drawable/item_circular_color_white_background.xml" value="0.118" />
         <entry key="..\:/Android/WorkoutApp/app/src/main/res/drawable/ripple_effect.xml" value="0.118" />
         <entry key="..\:/Android/WorkoutApp/app/src/main/res/drawable/round_bg.xml" value="0.118" />
+        <entry key="..\:/Android/WorkoutApp/app/src/main/res/drawable/text_circular_background.xml" value="0.118" />
         <entry key="..\:/Android/WorkoutApp/app/src/main/res/layout/activity_excercise.xml" value="0.1796875" />
+        <entry key="..\:/Android/WorkoutApp/app/src/main/res/layout/activity_finish.xml" value="0.1" />
         <entry key="..\:/Android/WorkoutApp/app/src/main/res/layout/activity_main.xml" value="0.165625" />
         <entry key="..\:/Android/WorkoutApp/app/src/main/res/layout/activity_start.xml" value="0.1796875" />
+        <entry key="..\:/Android/WorkoutApp/app/src/main/res/layout/dialog_custom_back.xml" value="0.1796875" />
+        <entry key="..\:/Android/WorkoutApp/app/src/main/res/layout/exercise_status_item.xml" value="0.1796875" />
+        <entry key="..\:/Android/WorkoutApp/app/src/main/res/layout/recyclerview_item.xml" value="0.1796875" />
       </map>
     </option>
   </component>
