@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--      DP    -->
+    <dimen name="dimen_5dp">5dp</dimen>
+    <dimen name="dimen_150dp">150dp</dimen>
+    <dimen name="dimen_220dp">220dp</dimen>
+
+    <!--   SP   -->
+    <dimen name="dimen_22sp">22sp</dimen>
+</resources>
